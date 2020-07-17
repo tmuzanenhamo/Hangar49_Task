@@ -3,6 +3,14 @@ This repo contains the application for the hangar49 Tech Task. The front end was
 
 # Dev Requirements Backend
 Required to install postgresql server on local machine and create DB, replace the connection string on line 14 in app.py
+Create the Database tables using the model defined in app.py by the following in the Python console
+
+```bash
+form app import db
+db.create_all()
+
+```
+
 
 # Install Requirements 
 To install and setup local dev environment setup virtualenv using python 3.7
