@@ -9,6 +9,8 @@ node_modules/
 /dnflodge-app/.env.production.local
 .idea
 __pycache__
+.vscode
+/try
 
 
 dnfLodge.db/
