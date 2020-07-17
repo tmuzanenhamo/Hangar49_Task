@@ -1,5 +1,5 @@
 # Hangar49_Task
-This repo contains the application for the hangar49 Tech Task. The front end was built with React and The backend was built with Flask using a Postgres Database 
+This repo contains the application for the hangar49 Tech Task. The front end was built with React and The backend was built with Flask and SQL ALchemy.The DB used is Postgres 
 
 # Dev Requirements Backend
 Required to install postgresql server on local machine and create DB, replace the connection string on line 14 in app.py
