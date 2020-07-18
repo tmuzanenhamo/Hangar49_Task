@@ -125,7 +125,7 @@ class App extends Component {
     .catch(error => {
        console.log(error)
      })
-     alert('The Email Reliability Status Was Updated') 
+     alert('The Email Reliability Status Was Updated :(') 
 
   }
    
