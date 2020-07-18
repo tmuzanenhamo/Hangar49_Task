@@ -10,8 +10,13 @@ app = Flask(__name__)
 
 ENV = "dev"
 
-# app.debug = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:@tawanda14@localhost/hangar49test'
+if ENV == "dev":
+    app.debug = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:@tawanda14@localhost/hangar49test'
+else:
+    app.debug = False
+    app.config['SQLALCHEMY_DATABASE_URI'] = ""
+
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
