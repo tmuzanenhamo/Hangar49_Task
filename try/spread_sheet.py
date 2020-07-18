@@ -43,6 +43,7 @@ def get_others(other, dict):
     # parameter_dict = {'hapikey': '4e729c19-df8f-4f97-825d-2308b611075e'}
     headers = {}
     has_more = True
+
     parameter_dict = {'hapikey': '4e729c19-df8f-4f97-825d-2308b611075e', "property": f"{other}"}
     others = []
     while has_more:
@@ -52,8 +53,13 @@ def get_others(other, dict):
         response_dict = json.loads(r.text)
         for i in range(len(response_dict["contacts"])):
             # print(response_dict["contacts"][i]["properties"])
-            other_col = response_dict["contacts"][i]["properties"][f"{other}"]["value"]
-            others.append(other_col)
+            try:
+                other_col = response_dict["contacts"][i]["properties"][f"{other}"]["value"]
+                others.append(other_col)
+
+            except:
+                other_col = response_dict
+                others.append(other_col)
 
             dict.update({f"{other}": others})
         has_more = response_dict['has-more']
@@ -63,7 +69,11 @@ def get_others(other, dict):
 vals = ["email", "country", "industry", "jobtitle", "founded", "kind", "size", "tag", "website", "job_title_full", "email_reliability_status"]
 l = {}
 for t in vals:
-    d = get_others(t, l)
-    print(d)
+    d = get_others("job_title_full", l)
+
+q = open("t.txt", 'w')
+q.write(json.dumps(d))
+q.close()
+print(d)
 
 # print("You've succesfully parsed through {} contact records and added them to a list".format(list_length))

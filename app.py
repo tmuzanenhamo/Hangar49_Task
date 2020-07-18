@@ -47,7 +47,7 @@ class DataTableModel(db.Model):
     def __init__(self, first_name, last_name, email, job_title_full, job_title, city, country, linkedin, company,
                  company_website, company_industry, company_founded, company_size, company_linkedin,
                  company_headquaters, email_reliability_status, receiving_email_server, kind, tag, month):
-        print("Hello")
+        # print("Hello")
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
@@ -70,26 +70,7 @@ class DataTableModel(db.Model):
         self.month = month
 
 
-def get_others(other, dict):
-    get_all_contacts_url = "https://api.hubapi.com/contacts/v1/lists/all/contacts/all?"
-    parameter_dict = {'hapikey': api_key}
-    headers = {}
-    has_more = True
-    parameter_dict = {'hapikey': api_key, "property": f"{other}"}
-    others = []
-    while has_more:
-        parameters = urlencode(parameter_dict)
-        get_url = get_all_contacts_url + parameters
-        r = requests.get(url=get_url, headers=headers)
-        response_dict = json.loads(r.text)
-        for i in range(len(response_dict["contacts"])):
-            # print(response_dict["contacts"][i]["properties"])
-            other_col = response_dict["contacts"][i]["properties"][f"{other}"]["value"]
-            others.append(other_col)
 
-            dict.update({f"{other}": others})
-        has_more = response_dict['has-more']
-    return dict
 
 
 @app.route("/get_data")
@@ -132,7 +113,7 @@ def submit():
             kind = data["kind"]
             tag = data["tag"]
             month = data["month"]
-            print(company_size)
+            # print(month)
 
             commit_data = DataTableModel(first_name, last_name, email, job_title_full, job_title, city, country,
                                          linkedin, company,
@@ -152,17 +133,18 @@ def submit():
                  "company_website": data.company_website, "company_industry": data.company_industry, "company_founded": data.company_founded,
                  "company_size": data.company_size, "company_linkedin": data.company_linkedin, "company_headquaters": data.company_headquaters,
                  "email_reliability_status": data.email_reliability_status, "receiving email server": data.receiving_email_server, "kind": data.kind, "tag": data.tag, "month": data.month})
-    print(f_data)           
+    # print(f_data)           
     return jsonify(f_data)
 
 
 @app.route("/push_hub", methods=["GET", "POST"])
 def push_hub():
-    api_key = "4e729c19-df8f-4f97-825d-2308b611075e"
+    api_key = "55c2950d-1177-4b52-a78b-3fbf8fd142b8"
     endpoint = f'https://api.hubapi.com/contacts/v1/contact/?hapikey={api_key}'
     headers = {"Content-Type": "application/json"}
     database_data = db.session.query(DataTableModel).all()
     for db_data in database_data:
+        # print(db_data.month)
         data = json.dumps({
             "properties": [
                 {
@@ -201,7 +183,6 @@ def push_hub():
                     "property": "company",
                     "value": db_data.company
                 },
-
                 {
                     "property": "website",
                     "value": db_data.company_website
@@ -211,12 +192,16 @@ def push_hub():
                     "value": db_data.company_industry
                 },
                 {
-                    "property": "founded",
+                    "property": "company_founded",
                     "value": db_data.company_founded
                 },
                 {
-                    "property": "size",
+                    "property": "company_size",
                     "value": db_data.company_size
+                }
+                , {
+                    "property": "month_value",
+                    "value": db_data.month
                 },
                 {
                     "property": "company_linkedin",
@@ -238,19 +223,53 @@ def push_hub():
                     "property": "tag",
                     "value": db_data.tag
                 }, {
-                    "property": "address",
+                    "property": "company_headquarters",
                     "value": db_data.company_headquaters
                 }
+                
             ]
+            
         })
 
+
+        f = open("demofile2.txt", "a")
+        
         r = requests.post(url=endpoint, data=data, headers=headers)
-        print(r.text)
+        # print(r.text)
+        f.write(r.text)
+        f.close()
     return jsonify("successfully posted to hub")
 
 
 @app.route("/hub_pull", methods=["GET", "POST"])
 def hub_pull():
+    
+    def get_others(other, dict):
+        get_all_contacts_url = "https://api.hubapi.com/contacts/v1/lists/all/contacts/all?"
+        parameter_dict = {'hapikey': api_key}
+        headers = {}
+        has_more = True
+        parameter_dict = {'hapikey': api_key, "property": f"{other}"}
+        others = []
+        while has_more:
+            parameters = urlencode(parameter_dict)
+            get_url = get_all_contacts_url + parameters
+            r = requests.get(url=get_url, headers=headers)
+            response_dict = json.loads(r.text)
+            for i in range(len(response_dict["contacts"])):
+                # print(response_dict["contacts"][i]["properties"])
+                try:
+                    other_col = response_dict["contacts"][i]["properties"][f"{other}"]["value"]
+                    others.append(other_col)
+
+                except:
+                    other_col = response_dict
+                    others.append(other_col)
+
+                dict.update({f"{other}": others})
+            has_more = response_dict['has-more']
+        return dict
+
     contact_list = []
     property_list = []
 
@@ -258,73 +277,87 @@ def hub_pull():
     parameter_dict = {'hapikey': api_key}
     headers = {}
     dictionery = {}
-    values = ["city", "email", "country", "industry", "jobtitle", "founded", "kind", "size", "tag", "website",
-              "firstname", "lastname", "company", "job_title_full", "email_reliability_status"]
+    values = ["city", "email", "country", "industry", "jobtitle", "company_founded", "kind", "company_size", "tag", "website",
+              "firstname", "lastname", "company", "job_title_full", "email_reliability_status", "linkedin", "company_linkedin", "company_headquarters", "receiving_email_server","month_value", "industry" ]
+    city= email= country= industry= job_title= founded= kind= size= tag= company_website= first_name= last_name= company=job_title_full=email_reliability_status=linkedin= company_linkedin= company_headquaters= receiving_email_server=month = ""
 
     for value in values:
-        get_others(value, dictionery)
+        dict_values = get_others(value, dictionery)
+        
+        for i in range(6):
+            for key, values in dict_values.items():
+ 
+                if key == "city":
+                    city = values[i]
+                elif key == "email":
+                    email = values[i]
+                elif key == "country":
+                    country = values[i]
+                elif key == "industry":
+                    industry = values[i]
+                elif key == "jobtitle":
+                    job_title = values[i]
+                elif key == "company_founded":
+                    founded = ""
+                elif key == "kind":
+                    kind = values[i]
+                elif key == "company_size":
+                    size = values[i]
+                elif key == "tag":
+                    tag = values[i]
+                elif key == "website":
+                    company_website = values[i]
+                elif key == "firstname":
+                    first_name = values[i]
+                elif key == "lastname":
+                    last_name = values[i]
+                elif key == "company":
+                    company = values[i]
+                elif key == "job_title_full":
+                    job_title_full = values[i]
+                elif key == "email_reliability_status":
+                    email_reliability_status = values[i]
+                elif key == "month_value":
+                    month = values[i]
+                elif key == "linkedin":
+                    try:
+                        linkedin = values[i]
+                    except:
+                        linkedin = ""
 
-    for i in range(6):
-        for key, values in dictionery.items():
-            if key == "city":
-                city = values[i]
-            elif key == "email":
-                email = values[i]
-            elif key == "country":
-                country = values[i]
-            elif key == "industry":
-                industry = values[i]
-            elif key == "jobtitle":
-                job_title = values[i]
-            elif key == "founded":
-                founded = values[i]
-            elif key == "kind":
-                kind = values[i]
-            elif key == "size":
-                size = values[i]
-            elif key == "tag":
-                tag = values[i]
-            elif key == "website":
-                company_website = values[i]
-            elif key == "firstname":
-                first_name = values[i]
-            elif key == "lastname":
-                last_name = values[i]
-            elif key == "company":
-                company = values[i]
-            elif key == "job_title_full":
-                job_title_full = values[i]
-            elif key == "email_reliability_status":
-                email_reliability_status = values[i]
-
-                linkedin = ""
-                company_linkedin = ""
-                company_headquaters = ""
-                receiving_email_server = ""
-                month = ""
-
-                if db.session.query(DataTableModel).filter(DataTableModel.first_name == first_name,
-                                                           DataTableModel.last_name == last_name,
-                                                           DataTableModel.email == email,
-                                                           DataTableModel.job_title == job_title,
-                                                           DataTableModel.city == city,
-                                                           DataTableModel.country == country,
-                                                           DataTableModel.job_title_full == job_title_full,
-                                                           DataTableModel.company == company,
-                                                           DataTableModel.tag == tag).count() == 0:
-                    add_data = DataTableModel(first_name, last_name, email, job_title_full, job_title, city, country,
-                                              linkedin, company,
-                                              company_website, industry, founded, size,
-                                              company_linkedin,
-                                              company_headquaters, email_reliability_status, receiving_email_server,
-                                              kind,
-                                              tag, month)
-                    db.session.add(add_data)
-                    db.session.commit()
-                print("Hie")
+                elif key == "compay_linkedin":
+                    try:
+                        company_linkedin = values[i]
+                    except:
+                        company_linkedin = ""
+                elif key == "company_headquarters":
+                    company_headquaters =  values[i]
+                elif  key == "receiving_email_server":
+                    try:
+                        receiving_email_server = values[i]
+                    except:
+                        receiving_email_server = ""
                 
-
-
+                    if db.session.query(DataTableModel).filter(DataTableModel.first_name == first_name,
+                                                            DataTableModel.last_name == last_name,
+                                                            DataTableModel.email == email,
+                                                            DataTableModel.job_title == job_title,
+                                                            DataTableModel.city == city,
+                                                            DataTableModel.country == country,
+                                                            DataTableModel.job_title_full == job_title_full,
+                                                            DataTableModel.company == company,
+                                                            DataTableModel.tag == tag).count() == 0:
+                                                            
+                        add_data = DataTableModel(first_name, last_name, email, job_title_full, job_title, city, country,
+                                                linkedin, company,
+                                                company_website, industry, founded, size,
+                                                company_linkedin,
+                                                company_headquaters, email_reliability_status, receiving_email_server,
+                                                kind,
+                                                tag, month)
+                        db.session.add(add_data)
+                        db.session.commit()
+                    
     return jsonify("successfully posted to hub")
 
 @app.route("/pull_dB", methods= ["GET", "POST"])
@@ -339,7 +372,7 @@ def pull_db():
                  "company_website": data.company_website, "company_industry": data.company_industry, "company_founded": data.company_founded,
                  "company_size": data.company_size, "company_linkedin": data.company_linkedin, "company_headquaters": data.company_headquaters,
                  "email_reliability_status": data.email_reliability_status, "receiving email server": data.receiving_email_server, "kind": data.kind, "tag": data.tag, "month": data.month})
-    print(f_data)           
+    # print(f_data)           
     return jsonify(f_data)
 
 
