@@ -2,7 +2,7 @@
 This repo contains the application for the hangar49 Tech Task. The front end was built with React and The backend was built with Flask and SQL ALchemy.The DB used is Postgres 
 
 # Dev Requirements Backend
-Required to install postgresql server on local machine and create DB, replace the connection string on line 14 in app.py
+Required to install postgresql server on local machine and create DB, replace the connection string on line 15 in app.py
 Create the Database tables using the model defined in app.py by the following in the Python console
 
 ```bash
