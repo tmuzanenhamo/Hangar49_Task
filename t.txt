@@ -1,1 +1,0 @@
-{"job_title_full": ["Account Manager Something", "Sales Something", "Sometimes CEO", "Operation Something", "Design Something", "Developer"]}
