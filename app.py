@@ -393,7 +393,7 @@ def update(id):
 
         return jsonify("Was updated")
     else:
-        return ("ID not found")
+        return jsonify("ID not found")
 
 
 
