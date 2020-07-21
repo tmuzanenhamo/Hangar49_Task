@@ -130,7 +130,22 @@ class App extends Component {
   }
    
   onWoodpecker =() =>{
-    alert("Function not implemeted yet")
+    fetch("/push_woodpecker", {
+      method: "GET",
+      dataType: "JSON",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+    })
+      .then((resp) => {
+        return resp.json();
+      })
+      .then((hub_pull) => {
+        console.log(hub_pull);
+      })
+      .catch((error) => {
+        console.log(error, "catch the hoop");
+      });
   }
 
 

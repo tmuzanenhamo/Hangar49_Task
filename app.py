@@ -5,6 +5,14 @@ from oauth2client.service_account import ServiceAccountCredentials
 import json
 import requests
 from urllib.parse import urlencode
+from sqlalchemy import text
+import xlsxwriter
+import pandas as pd
+from selenium import webdriver
+from getpass import getpass
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 app = Flask(__name__)
 
@@ -394,6 +402,84 @@ def update(id):
         return jsonify("Was updated")
     else:
         return ("ID not found")
+
+@app.route("/push_woodpecker", methods=["GET", "POST"])
+def push_woodpecker():
+
+    sql = text("select * from sheet_data " )
+    res = db.engine.execute(sql)
+    # workbook = xlsxwriter.Workbook('hello.xlsx') 
+    # worksheet = workbook.add_worksheet()
+    # book.close()
+    i = 0 
+    dic, arr = {}, []
+    m = []
+
+    for col in res:
+        for key, val in col.items():
+            m.append(key)
+            dic = {**dic, **{key: val}}
+        arr.append(dic)
+    d = open("m.txt", "w")
+    d.write(json.dumps(arr))
+    print(arr)
+    df = pd.DataFrame(columns=[m])
+    for i in arr:
+        # df.append(i, ignore_index=True)
+        d = open("l.txt", "w")
+        d.write(json.dumps(i))
+        # print(i)
+
+    # print(df)
+
+    df.to_excel('dict1.xlsx')
+
+        
+
+    email = "tawasdev@gmail.com"
+    password = "@Tawanda14"
+
+    driver = webdriver.Chrome("C:\\Dev\\ChromeDriver\\chromedriver.exe")
+    driver.get("https://app.woodpecker.co/login")
+
+    email_textbox = driver.find_element_by_name("login")
+    email_textbox.send_keys(email)
+    password_textbox = driver.find_element_by_name("password")
+    password_textbox.send_keys(password)
+
+    login_button = driver.find_element_by_class_name("w-button")
+    login_button.submit()
+
+    wait = WebDriverWait(driver, 10)
+    element = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '#prospects?r=t')]")))
+    element.click()
+
+
+    span =wait.until(EC.element_to_be_clickable((By.XPATH, "//span[text()='Add prospects']")))
+    span.click()
+
+    el2 = wait.until(EC.element_to_be_clickable((By.XPATH, ("(//div[@class='MenuItem-value'])[position()=1]"))))
+    el2.click()
+
+    file_upload = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "gwt-FileUpload")))
+    file_upload.send_keys('C:\\Users\\tmuza\\Downloads\\HNGTASK\\Tech Test.xlsx')
+
+    el3 = wait.until(EC.element_to_be_clickable((By.XPATH, ("(//div[@class='gwt-Label inLineLeft fontBook16 clientAddML'])[position()=2]"))))
+    el3.click()
+
+    el4 = wait.until(EC.element_to_be_clickable((By.XPATH, ("(//div[@class='gwt-Label buttonGreen hand GOU11VWDI'])"))))
+    el4.click()
+
+    el5= wait.until(EC.element_to_be_clickable((By.XPATH, ("(//div[@class='gwt-Label buttonGreen hand GOU11VWDD'])"))))
+    el5.click()
+
+    el6= wait.until(EC.element_to_be_clickable((By.XPATH, ("(//div[@class='gwt-Label buttonGreen goProsBtn'])"))))
+    el6.click()
+
+    return jsonify("Pushed to Woodpecker")
+
+
+
 
 
 
